@@ -170,23 +170,64 @@
   }
 
   // ============================================
+  // GALLERY CAROUSEL PAGINATION
+  // ============================================
+  function initGalleryCarousel() {
+    var pages = document.querySelectorAll('.gallery__page');
+    var dots = document.querySelectorAll('.gallery__dot');
+    var prevBtn = document.querySelector('.gallery__pag-prev');
+    var nextBtn = document.querySelector('.gallery__pag-next');
+    if (!pages.length) return;
+
+    var current = 0;
+    var total = pages.length;
+
+    function goTo(index) {
+      pages[current].classList.remove('active');
+      dots[current].classList.remove('active');
+      current = (index + total) % total;
+      pages[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function() { goTo(current - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { goTo(current + 1); });
+
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        goTo(parseInt(dot.dataset.page, 10));
+      });
+    });
+  }
+
+  // ============================================
   // LIGHTBOX GALLERY
   // ============================================
   function initLightbox() {
-    const lightbox = document.querySelector('.lightbox');
-    const items = document.querySelectorAll('.gallery__item');
-    if (!lightbox || !items.length) return;
+    var lightbox = document.querySelector('.lightbox');
+    if (!lightbox) return;
 
-    const closeBtn = lightbox.querySelector('.lightbox__close');
-    const prevBtn = lightbox.querySelector('.lightbox__nav--prev');
-    const nextBtn = lightbox.querySelector('.lightbox__nav--next');
-    const contentArea = lightbox.querySelector('.lightbox__content');
+    var closeBtn = lightbox.querySelector('.lightbox__close');
+    var prevBtn = lightbox.querySelector('.lightbox__nav--prev');
+    var nextBtn = lightbox.querySelector('.lightbox__nav--next');
+    var contentArea = lightbox.querySelector('.lightbox__content');
 
-    let currentIndex = 0;
+    // Collect ALL photos across all pages in order
+    var allItems = Array.from(document.querySelectorAll('.gallery__item'));
+    var currentIndex = 0;
+
+    function getSrc(item) {
+      var img = item.querySelector('img');
+      return img ? img.src : '';
+    }
+    function getAlt(item) {
+      var img = item.querySelector('img');
+      return img ? img.alt : 'Casa Bawi';
+    }
 
     function openLightbox(index) {
       currentIndex = index;
-      updateLightboxContent();
+      updateContent();
       lightbox.classList.add('active');
       document.body.style.overflow = 'hidden';
     }
@@ -196,47 +237,38 @@
       document.body.style.overflow = '';
     }
 
-    function updateLightboxContent() {
-      const item = items[currentIndex];
-      const placeholder = item.querySelector('.gallery__placeholder');
-      if (placeholder) {
-        contentArea.innerHTML = '';
-        const clone = placeholder.cloneNode(true);
-        clone.style.width = '70vw';
-        clone.style.height = '70vh';
-        clone.style.maxWidth = '900px';
-        clone.style.borderRadius = 'var(--radius)';
-        contentArea.appendChild(clone);
+    function updateContent() {
+      var src = getSrc(allItems[currentIndex]);
+      var alt = getAlt(allItems[currentIndex]);
+      contentArea.innerHTML = '';
+      if (src) {
+        var img = document.createElement('img');
+        img.src = src;
+        img.alt = alt;
+        contentArea.appendChild(img);
       }
     }
 
-    function nextSlide() {
-      currentIndex = (currentIndex + 1) % items.length;
-      updateLightboxContent();
-    }
+    function next() { currentIndex = (currentIndex + 1) % allItems.length; updateContent(); }
+    function prev() { currentIndex = (currentIndex - 1 + allItems.length) % allItems.length; updateContent(); }
 
-    function prevSlide() {
-      currentIndex = (currentIndex - 1 + items.length) % items.length;
-      updateLightboxContent();
-    }
-
-    items.forEach((item, index) => {
-      item.addEventListener('click', () => openLightbox(index));
+    allItems.forEach(function(item, index) {
+      item.addEventListener('click', function() { openLightbox(index); });
     });
 
     if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
-    if (prevBtn) prevBtn.addEventListener('click', prevSlide);
-    if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+    if (prevBtn) prevBtn.addEventListener('click', prev);
+    if (nextBtn) nextBtn.addEventListener('click', next);
 
-    lightbox.addEventListener('click', (e) => {
+    lightbox.addEventListener('click', function(e) {
       if (e.target === lightbox) closeLightbox();
     });
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', function(e) {
       if (!lightbox.classList.contains('active')) return;
       if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowRight') nextSlide();
-      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') prev();
     });
   }
 
@@ -308,6 +340,7 @@
     initNavbar();
     initMobileMenu();
     initScrollAnimations();
+    initGalleryCarousel();
     initLightbox();
     initSmoothScroll();
     initWhatsApp();

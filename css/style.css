@@ -305,7 +305,16 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: 0;
   background-color: var(--color-concrete);
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
   z-index: 0;
+  transform: scale(1.03);
+  transition: transform 8s ease;
+}
+
+.hero:hover .hero__bg {
+  transform: scale(1);
 }
 
 .hero__bg::after {
@@ -313,10 +322,10 @@ h1, h2, h3, h4 {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    to bottom,
-    rgba(44, 41, 38, 0.3) 0%,
-    rgba(44, 41, 38, 0.15) 50%,
-    rgba(44, 41, 38, 0.45) 100%
+    160deg,
+    rgba(44, 41, 38, 0.55) 0%,
+    rgba(44, 41, 38, 0.25) 45%,
+    rgba(44, 41, 38, 0.6) 100%
   );
 }
 
@@ -488,49 +497,54 @@ h1, h2, h3, h4 {
   background-color: var(--color-surface);
 }
 
+/* Outer flex wrapper: arrow — carousel — arrow */
+.gallery__wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.gallery__carousel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* CSS Grid masonry — portrait items span 2 rows */
 .gallery__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto;
+  grid-auto-rows: 260px;
+  grid-auto-flow: row dense;
   gap: 6px;
 }
 
 .gallery__item {
-  position: relative;
   overflow: hidden;
   cursor: pointer;
-  aspect-ratio: 4 / 3;
+  background-color: var(--color-concrete-dark);
 }
 
-.gallery__item--tall {
+/* Portrait photo: spans 2 rows = 526px tall */
+.gallery__item--portrait {
   grid-row: span 2;
-  aspect-ratio: auto;
 }
 
+/* Wide photo: spans 2 columns */
 .gallery__item--wide {
   grid-column: span 2;
 }
 
-/* Photo placeholders */
-.gallery__placeholder {
+.gallery__item img {
   width: 100%;
   height: 100%;
-  background-color: var(--color-concrete);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform var(--transition-slow);
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
 }
 
-.gallery__placeholder svg {
-  width: 32px;
-  height: 32px;
-  opacity: 0.3;
-  color: var(--color-white);
-}
-
-.gallery__item:hover .gallery__placeholder {
-  transform: scale(1.05);
+.gallery__item:hover img {
+  transform: scale(1.04);
 }
 
 .gallery__item::after {
@@ -544,6 +558,65 @@ h1, h2, h3, h4 {
 
 .gallery__item:hover::after {
   background-color: rgba(44, 41, 38, 0.1);
+}
+
+.gallery__item {
+  position: relative;
+}
+
+/* Carousel pages */
+.gallery__page {
+  display: none;
+}
+
+.gallery__page.active {
+  display: block;
+}
+
+/* Minimal arrow buttons — just the character, no border/circle */
+.gallery__arrow {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-size: 3.5rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--color-concrete);
+  flex-shrink: 0;
+  transition: color var(--transition);
+  user-select: none;
+}
+
+.gallery__arrow:hover {
+  color: var(--color-rose-dark);
+}
+
+/* Dots row below carousel */
+.gallery__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: var(--spacing-md);
+}
+
+.gallery__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-rose-light);
+  cursor: pointer;
+  transition: all var(--transition);
+  padding: 0;
+}
+
+.gallery__dot.active {
+  width: 22px;
+  border-radius: 4px;
+  background-color: var(--color-rose-dark);
 }
 
 /* ============================================
@@ -872,11 +945,12 @@ h1, h2, h3, h4 {
   justify-content: center;
 }
 
-.lightbox__content .gallery__placeholder {
-  width: 70vw;
-  height: 70vh;
-  max-width: 900px;
+.lightbox__content img {
+  max-width: 90vw;
+  max-height: 85vh;
+  object-fit: contain;
   border-radius: var(--radius);
+  display: block;
 }
 
 .lightbox__close {
